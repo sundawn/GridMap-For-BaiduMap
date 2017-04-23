@@ -378,6 +378,7 @@ var BaiduPointConvert = function (map) {
         var projection = this.map.getMapType().getProjection();
         return projection.lngLatToPoint(lngLat)
     },
+    //根据瓦片编号获取瓦片的经纬度
     this.tileToBounds = function (tileCoord) {
         var sw = this.tileToLngLat(tileCoord);//瓦片左下角坐标；
         var ne = this.tileToLngLat({ x: tileCoord.x + 1, y: tileCoord.y + 1 });//瓦片右上角坐标；
@@ -386,11 +387,13 @@ var BaiduPointConvert = function (map) {
             ne: ne
         };
     },
+    //根据距离计算经度
     this.milesToLng = function (point, miles) {
         var p2 = new BMap.Point(point.lng + 1, point.lat);
         var distance = this.map.getDistance(point, p2);
         return miles / distance;
     },
+    //根据距离计算纬度
     this.milesToLat = function (point, miles) {
         var p2 = new BMap.Point(point.lng, point.lat + 1);
         var distance = this.map.getDistance(point, p2);

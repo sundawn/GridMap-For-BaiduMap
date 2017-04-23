@@ -31,7 +31,7 @@ $(function () {
 
     var point = new BMap.Point(113.12, 23.02);
 
-    map.centerAndZoom(point, 11);
+    map.centerAndZoom(point, 14);
 
     map.enableScrollWheelZoom(); // 允许滚轮缩放
     map.setDefaultCursor("url('bird.cur')");
