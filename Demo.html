@@ -1,0 +1,98 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title></title>
+    <meta charset="utf-8" />
+    <script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=1XjLLEhZhQNUzd93EjU5nOGQ"></script>
+    <script src="GridMapControl.js"></script>
+    <script src="demo.js"></script>
+    <script src="MrGridmap.js"></script>
+
+    <style type="text/css">
+        body {
+            font-size: 12px;
+        }
+
+        .gridmap {
+            position: relative;
+        }
+
+        .gridmap-bar {
+            background-color: #ffffff;
+            padding: 7px;
+            left: auto;
+            top: auto;
+            right: 0px;
+            bottom: 0px;
+            position: absolute;
+            height: 25px;
+            font-size: 14px;
+            line-height: 25px;
+        }
+
+            .gridmap-bar ul {
+                padding: 0px;
+                margin: 0px;
+                height: 25px;
+            }
+
+            .gridmap-bar li {
+                list-style: none;
+                float: left;
+                margin-right: 1px;
+                height: 25px;
+                padding: 0px;
+            }
+
+        .tool {
+            padding-left: 10px;
+            height: 30px;
+            line-height: 25px;
+        }
+    </style>
+</head>
+<body>
+    <div class="tool">
+        <span>透明度：</span>
+        <span>
+            <select id="selectOpacity">
+                <option value="0.1">10%</option>
+                <option value="0.2">20%</option>
+                <option value="0.3">30%</option>
+                <option value="0.4">40%</option>
+                <option value="0.5">50%</option>
+                <option value="0.6">60%</option>
+                <option value="0.7" selected="selected">70%</option>
+                <option value="0.8">80%</option>
+                <option value="0.9">90%</option>
+                <option value="1">100%</option>
+            </select>
+        </span>
+        <span style="padding-left:10px;">画图模式：</span>
+        <span>
+            <select id="selectDrawMode">
+                <option value="all" >全图模式</option>
+                <option value="tiles">瓦片模式</option>
+            </select>
+        </span>
+        <span style="padding-left:10px;">颜色模式：</span>
+        <span>
+            <select id="selectColorMode">
+                <option value="gradient">渐变</option>
+                <option value="range">区间</option>
+            </select>
+        </span>
+    </div>
+    <div style="position:relative;width:1200px;">
+        <div id="mapContent" style="height:600px;width:1200px;">
+        </div>
+        <div class="gridmap-bar">
+            <ul id="colorBar">
+                <li>门限：</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
