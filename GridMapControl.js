@@ -1,4 +1,4 @@
-﻿/*使用说明：
+/*使用说明：
 
 实例化：
  var gridMap = new GridMap(map, {
@@ -47,7 +47,7 @@ GridMap.prototype = {
     map: null,//百度地图对象
     opacity: 0.65,//透明度
     ranges: [],//数值区间，顺序存放，如[0,10,20]
-    tileLayers: [],//瓦片图片列表
+    tileLayers: {},//瓦片图片字典
     imageLayer: null,//地图图片，如果不分瓦片呈现
     colorThresholds: [],//门限配置，用于普通绘制模式,按门限值顺序存放
     gradientTresholds: [],//渐变区间配置，用户绘制渐变模式，按区间值顺序排序
@@ -85,8 +85,11 @@ GridMap.prototype = {
         this.tiles = [];
         var $this = this;
 
-        $.each($this.tileLayers, function (i, item) {
-            $this.map.removeOverlay(item);
+        $.each(Object.keys(this.tileLayers), function (i, item) {
+            if ($this.tileLayers[item] != null) {
+                $this.map.removeOverlay($this.tileLayers[item]);
+                $this.tileLayers[item] = null;
+            }
         });
 
         if (this.imageLayer != null) {
@@ -96,15 +99,15 @@ GridMap.prototype = {
     },
     //获取当前地图所有瓦片
     getTiles: function () {
-        var PointConvert = new BaiduPointConvert(this.map);
+        var convert = new BaiduPointConvert(this.map);
         var ne = this.map.getBounds().getNorthEast();//右上角经纬度
         var sw = this.map.getBounds().getSouthWest();//左下角经纬度
 
-        var neTile = PointConvert.lngLatToTile(ne);//右上角的瓦片
+        var neTile = convert.lngLatToTile(ne);//右上角的瓦片
         neTile.x = Math.floor(neTile.x);
         neTile.y = Math.floor(neTile.y);
 
-        var swTile = PointConvert.lngLatToTile(sw);//左下角的瓦片
+        var swTile = convert.lngLatToTile(sw);//左下角的瓦片
         swTile.x = Math.floor(swTile.x);
         swTile.y = Math.floor(swTile.y);
 
@@ -127,12 +130,23 @@ GridMap.prototype = {
     //tileCoord:瓦片坐标，如{x:122,y:244}
     //image:图片数据
     addTileToMap(tileCoord, image) {
+
+        var $this = this;
+        var key = tileCoord.x + "_" + tileCoord.y;
+
         //计算瓦片所在的地图区域
-        var bounds = new BaiduPointConvert(this.map).tileToBounds(tileCoord);
+        var convert = new BaiduPointConvert(this.map);
+        var bounds = convert.tileToBounds(tileCoord);
+
+        //删除瓦片已经加载的图片，避免重叠渲染
+        if (this.tileLayers[key]) {
+            $this.map.removeOverlay(this.tileLayers[key]);
+        }
+
         var imageLayer = new BMap.GroundOverlay(new BMap.Bounds(bounds.sw, bounds.ne));
         imageLayer.setImageURL(image);
         this.map.addOverlay(imageLayer);
-        this.tileLayers.push(imageLayer);
+        this.tileLayers[key] = imageLayer;
     },
     //绘制瓦片的范围
     //tileCoord:瓦片坐标，如{x:122,y:244}
@@ -180,7 +194,7 @@ GridMap.prototype = {
     //tileCoord:瓦片坐标
     //data:栅格数据，为二维数据，格式为[[最小经度,最小纬度,最大经度,最大纬度,栅格的值]]
     drawTile: function (sw, ne, tileCoord, data) {
-        if (!data) { return; }
+        if (!data || this.colorThresholds.length == 0) { return; }
 
         var nePixel = this.map.pointToPixel(sw);
         var swPixel = this.map.pointToPixel(ne);
@@ -196,6 +210,9 @@ GridMap.prototype = {
     //绘制整个地图
     //data:栅格数据，为二维数据，格式为[[最小经度,最小纬度,最大经度,最大纬度,栅格的值]]
     draw: function (data) {
+
+        if (this.colorThresholds.length == 0) { return; }
+
         var canvas = $('<canvas width=' + this.map.width + ' height=' + this.map.height + ' "></canvas>')
         var context = canvas[0].getContext("2d");
 
@@ -295,6 +312,8 @@ var Color = {
     },
     //获取渐变颜色
     getGradientColor: function (thresholds, value) {
+
+        if (!thresholds || thresholds.length == 0) { return; }
 
         var beginColor = thresholds[0];
         var endColor = null;
@@ -400,4 +419,3 @@ var BaiduPointConvert = function (map) {
         return miles / distance;
     }
 }
-
