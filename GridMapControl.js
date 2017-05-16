@@ -193,7 +193,6 @@ GridMap.prototype = {
     },
     //分瓦片绘制地图
     drawTiles: function () {
-        isSetZIndex = false;
         var $this = this;
         $.each(this.tiles, function (i, tileCoord) {
             if ($this.readTileData) {
