@@ -41,6 +41,18 @@ function GridMap(map, option) {
     if (option.thresholds) {
         this.setThresholds(option.thresholds);
     }
+    if (option.zIndex) {
+        this.zIndex = option.zIndex;
+    }
+
+    //加载完成图层后设置瓦片的z-index
+    (function (gridMap) {
+        gridMap.map.addEventListener('tilesloaded', function (e) {
+            if (gridMap) {
+                gridMap.fixZIndex();
+            }
+        });
+    })(this);
 };
 
 GridMap.prototype = {
@@ -54,6 +66,8 @@ GridMap.prototype = {
     tiles: [],//当前地图的瓦片列表
     readTileData: null,//获取瓦片数据事件
     colorMode: 'gradient',//range：按指定颜色呈现，gradient：渐变的方式呈现颜色
+    zIndex: -1,
+    isSetZIndex: false,
     //设置颜色模式
     setColorMode: function (mode) {
         if (mode === "gradient" || mode === "range") {
@@ -145,6 +159,7 @@ GridMap.prototype = {
 
         var imageLayer = new BMap.GroundOverlay(new BMap.Bounds(bounds.sw, bounds.ne));
         imageLayer.setImageURL(image);
+        imageLayer.OverlayType = 'GridLayer';
         this.map.addOverlay(imageLayer);
         this.tileLayers[key] = imageLayer;
     },
@@ -179,6 +194,7 @@ GridMap.prototype = {
     },
     //分瓦片绘制地图
     drawTiles: function () {
+        isSetZIndex = false;
         var $this = this;
         $.each(this.tiles, function (i, tileCoord) {
             if ($this.readTileData) {
@@ -206,6 +222,26 @@ GridMap.prototype = {
         });
 
         this.addTileToMap(tileCoord, canvas[0].toDataURL());
+
+    },
+    //设置瓦片父级的DIV的z-index
+    fixZIndex: function () {
+        var $this = this;
+        var div = null;
+        if (this.imageLayer != null) {
+            div = this.imageLayer.V;
+        }
+        else {
+            var layerKeys = Object.keys(this.tileLayers);
+            var layers = $.grep(layerKeys, function (key) { return $this.tileLayers[key] != null; })
+            if (layers.length > 0) {
+                var key = layers[0];
+                div = this.tileLayers[key].V;
+            }
+        }
+        if (div) {
+            $(div).parent().css("z-index", this.zIndex);
+        }
     },
     //绘制整个地图
     //data:栅格数据，为二维数据，格式为[[最小经度,最小纬度,最大经度,最大纬度,栅格的值]]
@@ -223,7 +259,10 @@ GridMap.prototype = {
 
         this.imageLayer = new BMap.GroundOverlay(this.map.getBounds());
         this.imageLayer.setImageURL(canvas[0].toDataURL());
+        this.imageLayer.OverlayType = 'GridLayer';
         this.map.addOverlay(this.imageLayer);
+
+
     },
     //绘制栅格
     drawGrid: function (arr, cxt, nePixel, swPixel) {
