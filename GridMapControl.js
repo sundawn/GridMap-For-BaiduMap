@@ -67,7 +67,6 @@ GridMap.prototype = {
     readTileData: null,//获取瓦片数据事件
     colorMode: 'gradient',//range：按指定颜色呈现，gradient：渐变的方式呈现颜色
     zIndex: -1,
-    isSetZIndex: false,
     //设置颜色模式
     setColorMode: function (mode) {
         if (mode === "gradient" || mode === "range") {
